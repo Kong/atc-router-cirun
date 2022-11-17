@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package_type: [apk,deb]
+        package_type: [apk,deb,rpm]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -37,11 +37,8 @@ jobs:
     - name: Package via Docker Buildx
       run: |
         docker buildx build --build-arg PACKAGE_TYPE=${{ matrix.package_type }} --platform linux/amd64 --output type=tar,dest=out.tar.gz .
-        tar -xvf out.tar.gz
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+        mkdir -p /tmp/build
+        mv out.tar.gz /tmp/build/${{ matrix.package_type }}-aarch64.tar.gz
     - name: Add Release Artifacts to the Github Release
       if: steps['release']['outputs']['published'] == 'true'
       uses: softprops/action-gh-release@v1
