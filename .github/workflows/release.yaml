@@ -39,12 +39,10 @@ jobs:
       uses: docker/setup-buildx-action@v1
     - name: Package via Docker Buildx
       run: |
-        docker buildx build --build-arg PACKAGE_TYPE=${{ matrix.package_type }} --platform linux/amd64 --output type=tar,dest=out.tar.gz . && \
-        mkdir -p /tmp/build && \
-        mv out.tar.gz /tmp/build/${{ matrix.package_type }}-aarch64.tar.gz
+        docker buildx build --build-arg PACKAGE_TYPE=${{ matrix.package_type }} --platform linux/amd64 --output type=tar,dest=${{ matrix.package_type }}.tar.gz
     - name: Add Release Artifacts to the Github Release
       if: ${{ needs.release.outputs.published == 'true' }}
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ needs.release.outputs.release-git-tag }}
-        files: /tmp/builds/*
+        files: ${{ matrix.package_type }}.tar.gz
